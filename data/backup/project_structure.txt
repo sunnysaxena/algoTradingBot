@@ -1,0 +1,64 @@
+algo-trading-bot/
+│── config/
+│   │── config.yaml                  # API keys, DB settings, logging config
+│   │── logging_config.yaml          # Logging configuration
+│
+│── data/
+│   │── logs/                        # Trading logs
+│   │── backup/                      # Backup of historical data
+│
+│── database/                        # Database interactions
+│   │── db_connection.py             # Establish DB connections (MySQL, InfluxDB)
+│   │── db_operations.py             # CRUD operations for fetching/saving data
+│   │── schema.sql                   # SQL schema for MySQL/TimescaleDB
+│   │── influxdb_handler.py          # InfluxDB-specific storage functions
+│
+│── broker/                          # Broker API integration
+│   │── fyers_api.py                 # Fyers API interaction (REST & WebSockets)
+│   │── order_handler.py             # Order execution & management
+│
+│── strategies/                      # Trading strategies
+│   │── base_strategy.py             # Base class for strategies
+│   │── ema_rsi_crossover.py         # EMA & RSI crossover strategy
+│   │── straddle_strangle.py         # Options Straddle/Strangle strategy
+│
+│── core/                             # Core trading functionalities
+│   │── data_fetcher.py              # Fetches OHLC from DB & API
+│   │── order_execution.py           # Placing, modifying, and canceling orders
+│   │── option_chain.py              # Option chain data handling
+│   │── risk_management.py           # Stop-loss, target, risk handling
+│   │── signal_generator.py          # Generates buy/sell signals
+│   │── trade_manager.py             # Position monitoring and execution
+│   │── threading_manager.py         # Manages multi-threaded execution
+│   │── utils.py                     # Utility functions
+│   │── constants.py                 # Constants used across the project
+│   │── exceptions.py                # Custom exceptions
+│   │── logger.py                    # Custom logger
+│   │── telegram_bot.py              # Telegram bot for alerts
+│   │── cache.py                     # Caching for API responses
+│── websocket/                       # WebSocket handling
+│   │── websocket_handler.py         # Handles real-time price updates
+│
+│── monitoring/                      # Real-time monitoring and alerts
+│   │── alerts.py                    # Telegram, Email, Webhooks alerts
+│   │── dashboard.py                 # Web or CLI-based trading dashboard
+│
+│── tests/                           # Unit tests
+│   │── test_db_operations.py        # Tests for database interactions
+│   │── test_data_fetcher.py         # Tests for fetching data from API
+│   │── test_order_execution.py      # Tests for order execution and management
+│   │── test_strategy.py             # Tests for trading strategies
+│   │── test_risk_management.py      # Tests for risk management
+├── docs/                            # Documentation for setup and usage
+│   ├── README.md                    # Project overview and installation guide
+│   ├── API_REFERENCE.md             # API documentation for broker integration
+│   ├── STRATEGIES.md                # Explanation of implemented trading strategies
+│   ├── SETUP_GUIDE.md               # Setup guide for the project
+│   ├── CONTRIBUTING.md              # Guidelines for contributing to the project
+│
+│
+│── docker-compose.yml               # Docker configuration
+│── main.py                          # Entry point to run the bot
+│── requirements.txt                 # Dependencies
+│── README.md                        # Project documentation
+│── .gitignore                       # Ignore unnecessary files

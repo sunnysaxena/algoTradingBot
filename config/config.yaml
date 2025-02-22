@@ -1,0 +1,49 @@
+bot:
+  name: "AlgoTradingBot"
+  mode: "live"  # Options: 'live', 'paper', 'backtest'
+  log_level: "INFO"
+  max_concurrent_trades: 5
+
+broker:
+  name: "Fyers"
+  api_key: "your_api_key"
+  api_secret: "your_api_secret"
+  access_token: "your_access_token"
+  base_url: "https://api.fyers.in/api/v2"
+
+trading:
+  symbols:
+    - "NSE:NIFTY50-INDEX"
+    - "NSE:RELIANCE"
+    - "NSE:TCS"
+  strategy: "ema_rsi_crossover"
+  risk_management:
+    stop_loss: 0.02  # 2% stop loss
+    take_profit: 0.05 # 5% target profit
+    trailing_stop_loss: 0.01 # 1% trailing SL
+
+websocket:
+  market_data_url: "wss://api.fyers.in/socket/v2"
+  order_status_url: "wss://api.fyers.in/orders/v2"
+
+database:
+  mysql:
+    host: "localhost"
+    port: 3306
+    user: "trading_user"
+    password: "secure_password"
+    database: "trading_db"
+  influxdb:
+    host: "localhost"
+    port: 8086
+    database: "market_data"
+  timescaledb:
+    host: "localhost"
+    port: 5432
+    user: "trading_user"
+    password: "secure_password"
+    database: "historical_prices"
+
+telegram:
+  bot_token: "your_telegram_bot_token"
+  chat_id: "your_telegram_chat_id"
