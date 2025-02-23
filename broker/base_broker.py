@@ -1,3 +1,11 @@
+"""
+💡 Key Features
+✅ Modular Design: Each broker has a separate implementation file.
+✅ Factory Pattern: Dynamically selects and initializes the appropriate broker.
+✅ Easily Extendable: Add new brokers without modifying existing logic.
+✅ Encapsulation: Each broker class follows a structured interface (BaseBroker).
+"""
+
 from abc import ABC, abstractmethod
 
 class BaseBroker(ABC):

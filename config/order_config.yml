@@ -1,0 +1,26 @@
+# Order Configuration
+order:
+  type:
+    LIMIT_ORDER: 1
+    MARKET_ORDER: 2
+    STOP_ORDER: 3   # SL-M (Stop Market Order)
+    STOP_LIMIT_ORDER: 4   # SL-L (Stop Limit Order)
+
+  side:
+    BUY: 1
+    SELL: 2
+
+  product_type:
+    INTRADAY: "INTRADAY"
+    MARGIN: "MARGIN"
+    CO: "CO"
+    BO: "BO"
+
+  capital_settings:
+    CAPITAL: 750
+    lot_size:
+      NIFTY: 50
+      BANKNIFTY: 15
+      FINNIFTY: 40
+      MIDCPNIFTY: 75
+      DEFAULT: 25  # For other indices
