@@ -1,16 +1,78 @@
+"""
+RSI & MACD Crossover Strategy for Algorithmic Trading
+
+### Strategy Overview:
+This strategy combines the **Relative Strength Index (RSI)** and the **Moving Average Convergence Divergence (MACD)**
+to generate buy and sell signals. It also incorporates risk management features such as **stop-loss**, **take-profit**,
+and **trailing stop-loss** to enhance trading performance.
+
+### Strategy Logic:
+1. **RSI Calculation:**
+   - Measures momentum and identifies overbought (>=70) and oversold (<=30) conditions.
+
+2. **MACD Calculation:**
+   - Uses the MACD line (difference between short and long EMA) and the signal line (smoothed MACD) to detect trends.
+
+3. **Trade Entry Rules:**
+   - **Buy Signal:** RSI crosses below the oversold level (e.g., 30) AND MACD crosses above its signal line.
+   - **Sell Signal:** RSI crosses above the overbought level (e.g., 70) AND MACD crosses below its signal line.
+
+4. **Risk Management:**
+   - **Stop-Loss:** Set at a percentage below/above the entry price to limit losses.
+   - **Take-Profit:** Automatically exits trades when a target profit percentage is reached.
+   - **Trailing Stop-Loss:** Adjusts dynamically to lock in profits as price moves favorably.
+
+### Features:
+✅ **Customizable RSI & MACD parameters** (period, thresholds, fast/slow/signal lengths).
+✅ **Dual Confirmation** with RSI & MACD to reduce false signals.
+✅ **Integrated Risk Management** (Stop-Loss, Take-Profit, and Trailing Stop-Loss).
+✅ **Compatible with both TA-Lib and pandas_ta** for flexibility.
+✅ **Seamless Backtesting** with `BaseStrategy` framework.
+"""
+
 import talib
-import pandas_ta as ta
 import numpy as np
 import pandas as pd
+import pandas_ta as ta
 from strategies.base_strategy import BaseStrategy
 
 
 class RSI_MACD_CrossoverStrategy(BaseStrategy):
+    """
+    RSI & MACD Crossover Strategy
+
+    This strategy combines the Relative Strength Index (RSI) and the Moving Average Convergence Divergence (MACD)
+    indicators to generate buy and sell signals.
+
+    Features:
+    - Uses either TA-Lib or pandas_ta for indicator computation.
+    - Generates buy signals when RSI is oversold and MACD crosses above its signal line.
+    - Generates sell signals when RSI is overbought and MACD crosses below its signal line.
+    - Provides flexibility to configure RSI and MACD parameters via strategy_params.
+    """
+
     def __init__(self, df, strategy_params, library="talib"):
+        """
+        Initializes the RSI_MACD_CrossoverStrategy.
+
+        Parameters:
+        - df (pd.DataFrame): Historical market data containing 'close' prices.
+        - strategy_params (dict): Dictionary of strategy parameters including:
+            - rsi_period (int): Lookback period for RSI calculation.
+            - rsi_overbought (int): RSI threshold for overbought condition.
+            - rsi_oversold (int): RSI threshold for oversold condition.
+            - macd_fast (int): Fast EMA period for MACD.
+            - macd_slow (int): Slow EMA period for MACD.
+            - macd_signal (int): Signal line period for MACD.
+        - library (str): Choice of library for calculations ('talib' or 'pandas_ta').
+        """
         super().__init__(df, strategy_params)
         self.library = library  # Choose between "talib" or "pandas_ta"
 
     def apply_strategy(self):
+        """
+        Applies the RSI and MACD crossover strategy to generate trading signals.
+        """
         signals = pd.DataFrame(index=self.df.index)
         signals["close"] = self.df["close"]
 
