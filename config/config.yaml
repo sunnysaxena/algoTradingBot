@@ -68,7 +68,6 @@ trading:
       risk_per_trade: 2.0  # Risk per trade (as % of capital)
       position_size: 10    # Number of shares per trade
 
-
     StraddleStrangle:
       atm_strike_diff: 50
       otm_strike_diff: 100
