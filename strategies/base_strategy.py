@@ -1,73 +1,60 @@
+import numpy as np
+import matplotlib.pyplot as plt
 from abc import ABC, abstractmethod
 
-
 class BaseStrategy(ABC):
-    """
-    Abstract base class for all trading strategies.
+    def __init__(self, df, strategy_params, library="talib"):
+        self.df = df
+        self.strategy_params = strategy_params
+        self.signals = None
+        self.library = self._load_library(library)
 
-    This class defines the structure for any trading strategy, enforcing the implementation
-    of signal generation and trade execution methods. It also includes basic risk management
-    and position tracking functionalities.
-    """
-
-    def __init__(self, config, broker, data_source):
-        """
-        Initialize the strategy with configuration, broker API, and data source.
-
-        :param config: Dict containing strategy configuration.
-        :param broker: Broker API interface for executing trades.
-        :param data_source: Data source for fetching market data.
-        """
-        self.config = config
-        self.broker = broker
-        self.data_source = data_source
-        self.positions = []  # Track open positions
+    def _load_library(self, library_name):
+        """Dynamically load talib or pandas_ta"""
+        if library_name == "talib":
+            import talib
+            return talib
+        elif library_name == "pandas_ta":
+            import pandas_ta as ta
+            return ta
+        else:
+            raise ValueError(f"Unsupported library: {library_name}")
 
     @abstractmethod
-    def generate_signal(self, market_data):
-        """
-        Generate buy/sell/hold signals based on market data.
-
-        :param market_data: Market data (OHLC, indicators, etc.).
-        :return: Signal ('BUY', 'SELL', or 'HOLD').
-        """
+    def apply_strategy(self):
+        """Define the strategy logic in child classes"""
         pass
 
-    @abstractmethod
-    def execute_trade(self, signal, symbol):
-        """
-        Execute trade based on the generated signal.
+    def backtest(self, initial_capital=100000, commission=0.001, slippage=0.0005):
+        """Backtest logic (shared by all strategies)"""
+        self.df["returns"] = self.df["close"].pct_change()
+        self.df["strategy_returns"] = self.df["returns"] * self.signals["signal"].shift(1)
 
-        :param signal: The trade signal ('BUY', 'SELL').
-        :param symbol: The trading symbol.
-        """
-        pass
+        # Apply transaction costs
+        self.df["strategy_returns"] -= (commission + slippage)
 
-    def risk_management(self, position):
-        """
-        Apply stop-loss and take-profit rules to manage risk.
+        # Compute cumulative returns
+        self.df["cumulative_returns"] = (1 + self.df["strategy_returns"]).cumprod() * initial_capital
 
-        This method checks if the position has hit stop-loss or take-profit thresholds
-        and executes a trade accordingly.
+        return self.df
 
-        :param position: The current open position.
-        """
-        stop_loss = self.config["trading"]["risk_management"]["stop_loss"]
-        take_profit = self.config["trading"]["risk_management"]["take_profit"]
+    def plot_results(self):
+        """Plot trading signals & cumulative returns"""
+        fig, ax = plt.subplots(2, 1, figsize=(12, 8))
 
-        # Example risk management logic (to be customized)
-        if position["profit_pct"] <= -stop_loss:
-            self.execute_trade("SELL", position["symbol"])
-        elif position["profit_pct"] >= take_profit:
-            self.execute_trade("SELL", position["symbol"])
+        # Price & Buy/Sell Signals
+        ax[0].plot(self.df.index, self.df["close"], label="Close Price", color="black", linewidth=1)
+        buy_signals = self.df[self.signals["signal"] == 1]
+        sell_signals = self.df[self.signals["signal"] == -1]
+        ax[0].scatter(buy_signals.index, buy_signals["close"], label="Buy Signal", marker="^", color="green")
+        ax[0].scatter(sell_signals.index, sell_signals["close"], label="Sell Signal", marker="v", color="red")
+        ax[0].set_title("Entry & Exit Points")
+        ax[0].legend()
 
-    def update_positions(self, new_positions):
-        """
-        Update the list of current positions.
+        # Cumulative Returns
+        ax[1].plot(self.df.index, self.df["cumulative_returns"], label="Cumulative Returns", color="blue")
+        ax[1].set_title("Portfolio Performance")
+        ax[1].legend()
 
-        This method updates the strategy's internal record of open positions
-        based on the latest market data and executed trades.
-
-        :param new_positions: List of updated positions.
-        """
-        self.positions = new_positions
+        plt.tight_layout()
+        plt.show()

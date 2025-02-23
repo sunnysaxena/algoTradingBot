@@ -1,46 +1,70 @@
-from influxdb import InfluxDBClient
+import os
+from dotenv import load_dotenv
+from influxdb_client import InfluxDBClient
 
 
 class InfluxDBHandler:
-    """
-    Handles InfluxDB operations including writing and querying data.
-    """
+    def __init__(self):
+        # Load the .env file explicitly from config/
+        env_path = os.path.join(os.path.dirname(__file__), '../config/.env')
+        load_dotenv(env_path)
 
-    def __init__(self, config):
-        """
-        Initialize the InfluxDB client with connection settings.
+        # Read InfluxDB credentials from .env
+        self.url = os.getenv("INFLUXDB_URL")
+        self.org = os.getenv("INFLUXDB_ORG")
+        self.bucket = os.getenv("INFLUXDB_BUCKET")
+        self.token = os.getenv("INFLUXDB_TOKEN")
 
-        :param config: Dictionary containing InfluxDB connection details.
-        """
-        self.client = InfluxDBClient(
-            host=config["host"],
-            port=config["port"],
-            username=config["user"],
-            password=config["password"],
-            database=config["database"]
-        )
+        # Ensure credentials are set
+        if not all([self.url, self.org, self.bucket, self.token]):
+            raise ValueError("InfluxDB credentials are missing. Check your .env file.")
 
-    def write_data(self, measurement, data):
-        """
-        Write data to an InfluxDB measurement.
+        # Create InfluxDB client
+        self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
 
-        :param measurement: Name of the measurement.
-        :param data: Dictionary containing field names and values.
+    def query_data(self, query: str):
         """
-        json_body = [{"measurement": measurement, "fields": data}]
-        self.client.write_points(json_body)
+        Execute an InfluxDB query.
+        """
+        try:
+            query_api = self.client.query_api()
+            result = query_api.query(query)
+            return result
+        except Exception as e:
+            print(f"Error querying InfluxDB: {e}")
+            return None
 
-    def query_data(self, query):
+    def write_data(self, data):
         """
-        Execute a query on InfluxDB.
+        Write data to InfluxDB.
+        """
+        try:
+            write_api = self.client.write_api()
+            write_api.write(bucket=self.bucket, org=self.org, record=data)
+            print("Data written successfully to InfluxDB")
+        except Exception as e:
+            print(f"Error writing to InfluxDB: {e}")
 
-        :param query: InfluxQL query string.
-        :return: Query result.
+    def close(self):
         """
-        return self.client.query(query)
-
-    def close_connection(self):
-        """
-        Close the connection to InfluxDB.
+        Close the InfluxDB connection.
         """
         self.client.close()
+        print("InfluxDB connection closed.")
+
+
+# Example Usage
+if __name__ == "__main__":
+    influx_handler = InfluxDBHandler()
+
+    # Example Query (modify as needed)
+    query = f'from(bucket: "{influx_handler.bucket}") |> range(start: -1h)'
+    result = influx_handler.query_data(query)
+
+    if result:
+        for table in result:
+            for record in table.records:
+                print(record.values)
+
+    # Close the connection
+    influx_handler.close()

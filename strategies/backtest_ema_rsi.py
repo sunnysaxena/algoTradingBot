@@ -38,15 +38,9 @@ class EMARsiBacktester:
         self.data["Signal"] = "HOLD"
 
         for i in range(1, len(self.data)):
-            if (
-                    self.data["Short_EMA"][i] > self.data["Long_EMA"][i]
-                    and self.data["RSI"][i] < 70
-            ):
+            if self.data["Short_EMA"][i] > self.data["Long_EMA"][i]and self.data["RSI"][i] < 70:
                 self.data.loc[self.data.index[i], "Signal"] = "BUY"
-            elif (
-                    self.data["Short_EMA"][i] < self.data["Long_EMA"][i]
-                    and self.data["RSI"][i] > 30
-            ):
+            elif self.data["Short_EMA"][i] < self.data["Long_EMA"][i]and self.data["RSI"][i] > 30:
                 self.data.loc[self.data.index[i], "Signal"] = "SELL"
 
     def run_backtest(self, stop_loss_pct=0.02, take_profit_pct=0.04):
@@ -116,14 +110,14 @@ class EMARsiBacktester:
 def load_data_from_mysql():
     conn = mysql.connector.connect(
         host="localhost",
-        user="your_user",
-        password="your_password",
-        database="your_database"
+        user="root",
+        password="7777777777",
+        database="777777777"
     )
-    query = "SELECT date, open, high, low, close, volume FROM historical_ohlc_data"
-    df = pd.read_sql(query, conn, parse_dates=["date"])
+    query = "SELECT timestamp, open, high, low, close, volume FROM nifty50_1d LIMIT 90"
+    df = pd.read_sql(query, conn, parse_dates=["timestamp"])
     conn.close()
-    df.set_index("date", inplace=True)
+    df.set_index("timestamp", inplace=True)
     return df
 
 
