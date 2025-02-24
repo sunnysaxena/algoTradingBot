@@ -25,7 +25,7 @@ DB_PASSWORD = os.getenv("MYSQL_PASSWORD")
 # URL-encode the password
 DB_PASSWORD = quote_plus(DB_PASSWORD)
 DB_NAME = config["database"]["mysql"]["name"]
-DB_TABLE = config['database']['mysql']['historical_data_table']
+DB_TABLE = config['database']['mysql']['tables']['nifty50_1d']
 
 engine = create_engine(f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}")
 
