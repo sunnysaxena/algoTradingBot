@@ -1,0 +1,29 @@
+2025-02-25 19:01:52,958 - INFO - Initializing broker: fyers (Attempt 1)
+2025-02-25 19:01:53,136 - INFO - Start Epoch Time: 1740455100, End Epoch Time: 1740490313
+2025-02-25 19:01:53,136 - ERROR - Error fetching data for NSE:NIFTY50-INDEX: 'FyersBroker' object has no attribute 'get_history'
+2025-02-25 19:03:33,668 - INFO - Initializing broker: fyers (Attempt 1)
+2025-02-25 19:03:33,730 - INFO - Initializing broker: fyers (Attempt 1)
+2025-02-25 19:03:33,807 - INFO - Start Epoch Time: 1740455100, End Epoch Time: 1740490413
+2025-02-25 19:03:33,807 - ERROR - Error fetching data for NSE:NIFTY50-INDEX: FyersBroker.history() got an unexpected keyword argument 'data'
+2025-02-25 19:03:33,852 - INFO - Start Epoch Time: 1740455100, End Epoch Time: 1740490413
+2025-02-25 19:03:33,852 - ERROR - Error fetching data for NSE:NIFTY50-INDEX: FyersBroker.history() got an unexpected keyword argument 'data'
+2025-02-25 19:03:35,172 - INFO - Initializing broker: fyers (Attempt 1)
+2025-02-25 19:03:35,345 - INFO - Start Epoch Time: 1740455100, End Epoch Time: 1740490415
+2025-02-25 19:03:35,345 - ERROR - Error fetching data for NSE:NIFTY50-INDEX: FyersBroker.history() got an unexpected keyword argument 'data'
+2025-02-25 19:04:04,860 - INFO - Initializing broker: fyers (Attempt 1)
+2025-02-25 19:04:05,010 - INFO - Start Epoch Time: 1740455100, End Epoch Time: 1740490445
+2025-02-25 19:04:05,010 - ERROR - Error fetching data for NSE:NIFTY50-INDEX: FyersBroker.history() got an unexpected keyword argument 'data'
+2025-02-25 19:04:46,683 - INFO - Initializing broker: fyers (Attempt 1)
+2025-02-25 19:04:47,065 - INFO - Start Epoch Time: 1740455100, End Epoch Time: 1740490487
+2025-02-25 19:04:47,065 - ERROR - Error fetching data for NSE:NIFTY50-INDEX: FyersBroker.history() got an unexpected keyword argument 'data'
+2025-02-25 19:05:11,223 - INFO - Initializing broker: fyers (Attempt 1)
+2025-02-25 19:05:11,359 - INFO - Start Epoch Time: 1740455100, End Epoch Time: 1740490511
+2025-02-25 19:05:11,359 - ERROR - Error fetching data for NSE:NIFTY50-INDEX: FyersBroker.history() got an unexpected keyword argument 'data'
+2025-02-25 20:42:54,252 - INFO - Initializing broker: fyers (Attempt 1)
+2025-02-25 20:42:54,412 - INFO - Start Epoch Time: 1740455100, End Epoch Time: 1740496374
+2025-02-25 20:42:54,412 - ERROR - Error fetching data for NSE:NIFTY50-INDEX: FyersBroker.history() got an unexpected keyword argument 'data'
+2025-02-25 20:48:50,866 - INFO - Initializing broker: fyers (Attempt 1)
+2025-02-25 20:48:51,048 - INFO - Start Epoch Time: 1740455100, End Epoch Time: 1740496731
+2025-02-25 20:48:51,234 - INFO - Data fetched successfully for NSE:NIFTY50-INDEX.
+2025-02-25 20:50:00,906 - INFO - Initializing broker: fyers (Attempt 1)
+2025-02-25 20:50:05,379 - INFO - Initializing broker: fyers (Attempt 1)
