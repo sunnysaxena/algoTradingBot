@@ -92,17 +92,17 @@ class BaseBroker(ABC):
         pass
 
     @abstractmethod
-    def history(self):
+    def history(self, data):
         pass
 
     @abstractmethod
-    def quotes(self):
+    def quotes(self, data):
         pass
 
     @abstractmethod
-    def market_depth(self):
+    def market_depth(self, data):
         pass
 
     @abstractmethod
-    def option_chain(self):
+    def option_chain(self, data):
         pass

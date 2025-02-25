@@ -2,7 +2,6 @@ import os
 import logging
 from core.utility import Utility
 from .base_broker import BaseBroker
-from core.utility import Utility as uts
 from fyers_apiv3.fyersModel import FyersModel
 
 
@@ -92,14 +91,14 @@ class FyersBroker(BaseBroker):
     def convert_position(self, data):
         return self.client.convert_position(data)
 
-    def history(self):
-        return self.client.history()
+    def history(self, data):
+        return self.client.history(data)
 
-    def quotes(self):
-        return self.client.quotes()
+    def quotes(self, data):
+        return self.client.quotes(data)
 
-    def market_depth(self):
-        return self.client.depth()
+    def market_depth(self, data):
+        return self.client.depth(data)
 
-    def option_chain(self):
-        return self.client.optionchain()
+    def option_chain(self, data):
+        return self.client.optionchain(data)
