@@ -1,4 +1,4 @@
-.idea
+.idea/
 config/.env
 config/config.yaml
 config/broker_config.yaml

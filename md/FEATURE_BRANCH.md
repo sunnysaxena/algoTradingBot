@@ -14,15 +14,15 @@ or
 
 Feature	Branch Name
 
-| Feature                    | Branch Name                   |
-|----------------------------|-------------------------------|
-| Add support for Fyers API	 | feature/fyers-integration     |
-| Implement EMA & RSI strategy	 | feature/ema-rsi-strategy      |
+| Feature                   | Branch Name                   |
+|---------------------------|-------------------------------|
+|Add support for Fyers API	 | feature/fyers-integration     |
+|Implement EMA & RSI strategy	 | feature/ema-rsi-strategy      |
 |Add WebSocket for live data	| feature/websocket-streaming   |
 |Improve order execution logic	 | feature/order-execution       |
 |Store encrypted credentials	| feature/encrypted-credentials |
-|Add broker selection UI	    | feature/broker-selection-ui   |
-|Automate options trading	   | feature/options-trading-bot   |
+|Add broker selection UI	   | feature/broker-selection-ui   |
+|Automate options trading	  | feature/options-trading-bot   |
 
 
 ### 🔹 If Using Jira, Trello, or Issue Trackers
@@ -44,11 +44,12 @@ If you have task IDs from Jira, Trello, etc., include them:
 ✅ Stick to a standard format for consistency
 
 
-### ❌ Not Recommended: feature/miscellaneous is too vague.
+#### ❌ Not Recommended: feature/miscellaneous is too vague.
+<br>
 
 ### ✅ Better Alternative:   
 
-If the feature covers mul**tiple unrelated changes**, try to break them into **separate feature branches** with specific names.
+If the feature covers **multiple unrelated changes**, try to break them into **separate feature branches** with specific names.
 
 If it's truly a **mixed bag of minor updates**, consider:
 
@@ -57,4 +58,3 @@ If it's truly a **mixed bag of minor updates**, consider:
 * `feature/general-improvements` (if multiple enhancements)
 
 🔹 **Best Practice:** A feature branch should focus on a **single** change or improvement for better tracking and collaboration. 🚀
-
