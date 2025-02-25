@@ -1,5 +1,8 @@
+import os
+import logging
+from core.utility import Utility
 from .base_broker import BaseBroker
-from fyers_apiv3 import fyersModel
+from core.utility import Utility as uts
 from fyers_apiv3.fyersModel import FyersModel
 
 
@@ -7,16 +10,36 @@ class FyersBroker(BaseBroker):
     """Implementation for Fyers API"""
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        try:
+            super().__init__(**kwargs)
 
-        # Extract required parameters
-        self.client_id = kwargs.get("client_id")
-        self.access_token = kwargs.get("access_token")
-        self.log_dir = kwargs.get("log_dir")
+            # Extract required parameters
+            self.client_id = kwargs.get("client_id")
+            self.access_token = kwargs.get("access_token")
+            self.log_dir = kwargs.get("log_dir")
 
-        # Initialize Fyers client
-        self.client = FyersModel(client_id=self.client_id, token=self.access_token,
-                                 log_path=self.log_dir, is_async=False)
+            # Ensure required parameters are present
+            if not self.client_id or not self.access_token:
+                raise ValueError("Error: Missing required parameters 'client_id' or 'access_token'.")
+
+            # Validate log directory
+            if self.log_dir and not os.path.isdir(self.log_dir):
+                raise ValueError(f"Error: Invalid log directory '{self.log_dir}'.")
+
+            # Fetch and validate access token
+            token = Utility.get_access_token(self.access_token)
+            if not token:
+                raise ValueError("Error: Failed to retrieve access token.")
+
+            # Initialize Fyers client
+            self.client = FyersModel(client_id=self.client_id, token=token, log_path=self.log_dir, is_async=False)
+
+        except ValueError as ve:
+            logging.error(f"ValueError: {ve}")
+            raise ve
+        except Exception as e:
+            logging.critical(f"Critical Error during FyersBroker initialization: {e}")
+            raise RuntimeError(f"FyersBroker initialization failed: {e}")
 
     def get_token(self):
         return self.client.token

@@ -1,15 +1,15 @@
 import os
 import yaml
 import pandas as pd
-from pathlib import Path
+from core.utility import Utility
 from dotenv import load_dotenv
 from urllib.parse import quote_plus
 from sqlalchemy import create_engine
 
-# Load the .env and config.yml file explicitly from config/
-ROOT_DIR = Path(__file__).resolve().parent.parent  # Get root directory
-config_path = os.path.join(ROOT_DIR, "config/config.yaml")
-env_path = os.path.join(ROOT_DIR, "config/.env")
+config_path = os.path.join(Utility.get_root_dir(), "config/config.yaml")
+env_path = os.path.join(Utility.get_root_dir(), "config/.env")
+
+print(Utility.get_root_dir())
 
 # Load environment variables
 load_dotenv(env_path)

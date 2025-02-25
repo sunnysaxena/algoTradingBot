@@ -2,4 +2,4 @@
 config/.env
 config/config.yaml
 config/broker_config.yaml
-access_token.txt
+config/access_token.txt
