@@ -27,7 +27,7 @@ Your project structure is well-organized but has some redundancy and could be sl
 
 #### ✅ **Unify** `database` **handling**:
 
-* Instead of `database/db_operations.py`, `database/mysql_handler.py`, `database/timescale_handler.py`, and database/influxdb_handler.py, consider a **single** `database/handler.py` that abstracts the logic.
+* Instead of `database/db_operations.py`, `database/mysql_handler.py`, `database/timescale_handler.py`, and `database/influxdb_handler.py`, consider a **single** `database/handler.py` that abstracts the logic.
 
 #### ✅ **Keep** `config` **cleaner**:
 

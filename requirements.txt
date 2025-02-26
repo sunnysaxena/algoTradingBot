@@ -24,7 +24,7 @@ blinker==1.8.1
 boto3==1.34.14
 botocore==1.34.14
 cachetools==5.3.3
-certifi==2023.11.17
+certifi==2024.7.4
 charset-normalizer==3.3.2
 click==8.1.7
 comm==0.2.1
@@ -67,7 +67,7 @@ htbuilder==0.9.0
 html5lib==1.1
 httplib2==0.22.0
 hyperlink==21.0.0
-idna==3.6
+idna==3.7
 incremental==24.7.2
 influxdb-client==1.48.0
 ipykernel==6.28.0
@@ -87,12 +87,12 @@ jsonschema-specifications==2023.12.1
 jupyter==1.0.0
 jupyter-console==6.6.3
 jupyter-events==0.9.0
-jupyter-lsp==2.2.1
+jupyter-lsp==2.2.2
 jupyter_client==8.6.0
 jupyter_core==5.7.1
 jupyter_server==2.12.4
 jupyter_server_terminals==0.5.1
-jupyterlab==4.0.10
+jupyterlab==4.2.5
 jupyterlab-widgets==3.0.9
 jupyterlab_pygments==0.3.0
 jupyterlab_server==2.25.2
@@ -117,7 +117,7 @@ nbclient==0.9.0
 nbconvert==7.14.1
 nbformat==5.9.2
 nest-asyncio==1.5.8
-notebook==7.0.6
+notebook==7.2.2
 notebook_shim==0.2.3
 outcome==1.3.0.post0
 overrides==7.4.0
@@ -164,7 +164,7 @@ QtPy==2.4.1
 reactivex==4.0.4
 referencing==0.32.1
 rel==0.4.9.19
-requests==2.31.0
+requests==2.32.0
 rfc3339-validator==0.1.4
 rfc3986-validator==0.1.1
 rich==13.7.1
@@ -172,7 +172,7 @@ rpds-py==0.17.1
 rsa==4.9
 s3transfer==0.10.0
 schedule==1.2.2
-scikit-learn==1.4.1.post1
+scikit-learn==1.5.0
 scipy==1.13.0
 seaborn==0.13.2
 selenium==4.22.0
@@ -205,7 +205,7 @@ tinycss2==1.2.1
 toml==0.10.2
 tomlkit==0.13.2
 toolz==0.12.1
-tornado==6.4
+tornado==6.4.2
 tqdm==4.67.1
 traitlets==5.14.1
 trio==0.25.1
@@ -216,7 +216,7 @@ types-python-dateutil==2.8.19.20240106
 typing_extensions==4.12.2
 uri-template==1.3.0
 uritemplate==4.1.1
-urllib3==2.0.7
+urllib3==2.2.2
 validators==0.34.0
 watchdog==4.0.0
 wcwidth==0.2.13
