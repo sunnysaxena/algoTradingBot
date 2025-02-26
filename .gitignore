@@ -3,3 +3,8 @@ config/.env
 config/config.yaml
 config/broker_config.yaml
 config/access_token.txt
+
+# Ignore compiled Python files
+__pycache__/
+*.pyc
+*.pyo
