@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from tqdm import tqdm
 
 # Load database credentials from .env
-load_dotenv('config/.env')
+load_dotenv('../../config/.env')
 
 """
 # MySQL Credentials
