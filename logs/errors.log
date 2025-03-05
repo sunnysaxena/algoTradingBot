@@ -1,3 +1,29 @@
 2025-02-26 20:12:15,053 - ERROR - logger - This is an error message.
 2025-02-26 20:12:56,932 - ERROR - logger - This is an error message.
 2025-02-26 20:13:04,840 - ERROR - logger - This is an error message.
+2025-02-27 14:33:03,275 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-27 14:33:03,276 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-27 14:33:03,284 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-27 14:33:03,284 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-27 14:38:16,747 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-27 14:38:16,747 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-27 14:38:16,756 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-27 14:38:16,756 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-27 14:38:38,698 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-27 14:38:38,698 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-27 14:42:33,701 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-27 14:42:33,701 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-28 11:06:15,475 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-28 11:06:15,475 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-28 12:42:46,786 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-28 12:42:46,786 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-28 12:47:46,916 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-28 12:47:46,916 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-28 12:49:41,250 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-28 12:49:41,250 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-28 12:49:41,259 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-28 12:49:41,259 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-28 12:50:27,429 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-28 12:50:27,429 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-28 12:52:22,015 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-28 12:52:22,015 - ERROR - strategy_runner - No data available for backtest_engine.

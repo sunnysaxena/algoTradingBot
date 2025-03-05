@@ -2,32 +2,39 @@ import os
 import asyncio
 import logging
 import threading
-import mysql.connector
-import psycopg2
 import influxdb_client
 import websockets
+from dotenv import load_dotenv
+
 from mysql.connector.pooling import MySQLConnectionPool
 from psycopg2.pool import SimpleConnectionPool
 from influxdb_client.client.write_api import SYNCHRONOUS
 from tenacity import retry, stop_after_attempt, wait_fixed
-from dotenv import load_dotenv
+from utils.env_loader import load_env
 
 # Load environment variables
-load_dotenv()
+load_dotenv(load_env())
 
 # Configure Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-class DatabaseHandler:
+class DatabaseHandler(object):
     _lock = threading.Lock()
 
-    def __init__(self, db_type):
+    def __init__(self, db_config):
         """
         Initialize a database handler for MySQL, TimescaleDB, or InfluxDB.
         :param db_type: str -> "mysql", "timescaledb", or "influxdb"
         """
-        self.db_type = db_type.lower()
+        if not isinstance(db_config, dict):
+            raise ValueError("db_config should be a dictionary")
+
+        self.db_type = db_config.get("type", "").lower()  # Extract db_type safely
+
+        # print(f"🔍 Database Type Detected: {self.db_type}")  # Debugging line
+
+        self.config = db_config  # Store full config for later use
         self.conn = None
         self.cursor = None
         self.pool = None
@@ -79,10 +86,12 @@ class DatabaseHandler:
 
     def get_connection(self):
         """Retrieve a connection from the pool (MySQL & TimescaleDB only)."""
-        if self.db_type in ["mysql", "timescaledb"]:
-            self.conn = self.pool.getconn()
-            self.cursor = self.conn.cursor()
-            return self.conn
+        if self.db_type == "mysql":
+            self.conn = self.pool.get_connection()  # ✅ Use `get_connection()`
+        elif self.db_type == "timescaledb":
+            self.conn = self.pool.getconn()  # ✅ TimescaleDB uses `getconn()`
+        self.cursor = self.conn.cursor()
+        return self.conn
 
     @retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
     async def execute_query(self, query, params=None):
@@ -150,18 +159,26 @@ class DatabaseHandler:
 
     def close(self):
         """Release the connection back to the pool."""
-        if self.db_type in ["mysql", "timescaledb"] and self.conn:
-            self.pool.putconn(self.conn)
+        if self.db_type == "mysql" and self.conn:
+            self.conn.close()  # ✅ Correct for MySQL
+            self.conn = None
+            self.cursor = None
+        elif self.db_type == "timescaledb" and self.conn:
+            self.pool.putconn(self.conn)  # ✅ Correct for TimescaleDB
             self.conn = None
             self.cursor = None
 
     def close_all(self):
         """Close all database connections."""
-        if self.db_type in ["mysql", "timescaledb"]:
+        if self.db_type == "mysql":
+            self.pool = None  # MySQL pool does not support closeall()
+            logger.info("🔌 MySQL connection pool cleared.")
+        elif self.db_type == "timescaledb":
             self.pool.closeall()
+            logger.info("🔌 TimescaleDB connection pool closed.")
         elif self.db_type == "influxdb":
             self.client.close()
-        logger.info("🔌 Database connections closed.")
+            logger.info("🔌 InfluxDB client closed.")
 
     async def websocket_stream(self, uri):
         """WebSocket client for real-time market data."""
@@ -176,24 +193,52 @@ class DatabaseHandler:
 # Example Usage
 if __name__ == "__main__":
     async def main():
+
+        """
+        db_config = {
+            "type": "mysql",
+            "host": os.getenv("MYSQL_HOST"),
+            "user": os.getenv("MYSQL_USER"),
+            "password": os.getenv("MYSQL_PASSWORD"),
+            "database": os.getenv("MYSQL_DATABASE"),
+        }
+
         # MySQL Example
-        mysql_handler = DatabaseHandler("mysql")
-        results = await mysql_handler.execute_query("SELECT * FROM trades LIMIT 5;")
+        mysql_handler = DatabaseHandler(db_config)
+        results = await mysql_handler.execute_query("SELECT * FROM nifty50_1m LIMIT 5;")
         logger.info(results)
         mysql_handler.close_all()
+        """
 
         # TimescaleDB Example
-        tsdb_handler = DatabaseHandler("timescaledb")
-        await tsdb_handler.execute_update("INSERT INTO ohlc (timestamp, open, high, low, close, volume) VALUES (NOW(), 100, 105, 99, 102, 5000);")
+        tsdb_config = {
+            "type": "timescaledb",
+            "host": os.getenv("TIMESCALEDB_HOST"),
+            "user": os.getenv("TIMESCALEDB_USER"),
+            "password": os.getenv("TIMESCALEDB_PASSWORD"),
+            "database": os.getenv("TIMESCALEDB_DATABASE"),
+        }
+        tsdb_handler = DatabaseHandler(tsdb_config)
+        results = await tsdb_handler.execute_query("SELECT * FROM nifty50.nifty50_1d LIMIT 5;")
+        logger.info(results)
         tsdb_handler.close_all()
 
+        """
         # InfluxDB Example
-        influx_handler = DatabaseHandler("influxdb")
+        influx_config = {
+            "type": "influxdb",
+            "url": os.getenv("INFLUXDB_URL"),
+            "token": os.getenv("INFLUXDB_TOKEN"),
+            "org": os.getenv("INFLUXDB_ORG"),
+        }
+        influx_handler = DatabaseHandler(influx_config)
         influx_handler.write_influx("market_data", "ohlc", {"symbol": "NIFTY50"}, {"open": 100, "close": 102})
         influx_handler.close_all()
 
-        # WebSocket Example
-        ws_handler = DatabaseHandler("mysql")  # Just an instance for WebSocket
+        # WebSocket Example (Standalone)
+        ws_handler = DatabaseHandler(db_config)
         await ws_handler.websocket_stream("wss://your-websocket-url")
+        """
+
 
     asyncio.run(main())

@@ -2,7 +2,7 @@ import yaml
 import os
 
 
-def load_config():
+def load_config1():
     """Load and resolve paths in the YAML configuration file."""
 
     # Get the absolute path of the config directory
@@ -30,6 +30,21 @@ def load_config():
         return obj
 
     return resolve_paths(config)
+
+
+def load_config():
+    """Load and resolve paths in the .env configuration file."""
+
+    # Get the absolute path of the config directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))  # Get current script's directory
+    config_path = os.path.join(script_dir, "../config/config.yaml")  # Adjust path to config.yaml
+
+    # Ensure the path is normalized
+    config_path = os.path.normpath(config_path)
+
+    if not os.path.exists(config_path):
+        raise FileNotFoundError(f"Environment variable file not found: {config_path}")
+    return config_path
 
 
 # Example usage

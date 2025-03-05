@@ -85,7 +85,7 @@ class BaseStrategy(ABC):
         Simulates the strategy’s performance using historical data.
 
         Parameters:
-            initial_capital (float): Starting capital for backtesting.
+            initial_capital (float): Starting capital for backtest_engine.
             commission (float): Commission cost per trade.
             slippage (float): Slippage cost per trade.
 
