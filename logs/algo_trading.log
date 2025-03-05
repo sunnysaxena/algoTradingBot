@@ -4,3 +4,71 @@
 2025-02-26 20:12:56,932 - ERROR - logger - This is an error message.
 2025-02-26 20:13:04,840 - INFO - logger - Logging setup complete.
 2025-02-26 20:13:04,840 - ERROR - logger - This is an error message.
+2025-02-26 22:40:22,006 - INFO - strategy_runner - Running backtest for MACD_CrossoverStrategy
+2025-02-26 22:41:21,786 - INFO - strategy_runner - Running backtest for MACD_CrossoverStrategy
+2025-02-26 22:42:09,386 - INFO - strategy_runner - Running backtest for MACD_CrossoverStrategy
+2025-02-26 22:50:05,905 - INFO - strategy_runner - Running backtest for MACD_CrossoverStrategy
+2025-02-27 12:12:20,916 - INFO - strategy_runner - Running backtest for MACD_CrossoverStrategy
+2025-02-27 13:55:27,259 - INFO - strategy_runner - Running backtest for MACD_CrossoverStrategy
+2025-02-27 14:32:10,391 - INFO - strategy_runner - Running backtest for MACD_CrossoverStrategy
+2025-02-27 14:33:03,263 - INFO - strategy_runner - Running backtest for MACD_CrossoverStrategy
+2025-02-27 14:33:03,275 - INFO - handler - ✅ TimescaleDB connection pool initialized.
+2025-02-27 14:33:03,275 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-27 14:33:03,276 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-27 14:33:03,276 - INFO - strategy_runner - Running backtest for EMA_RSI_CrossoverStrategy
+2025-02-27 14:33:03,284 - INFO - handler - ✅ TimescaleDB connection pool initialized.
+2025-02-27 14:33:03,284 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-27 14:33:03,284 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-27 14:36:41,654 - INFO - handler - ✅ TimescaleDB connection pool initialized.
+2025-02-27 14:36:41,654 - INFO - backtest - Starting backtest_engine...
+2025-02-27 14:38:16,736 - INFO - strategy_runner - Running backtest for MACD_CrossoverStrategy
+2025-02-27 14:38:16,747 - INFO - handler - ✅ TimescaleDB connection pool initialized.
+2025-02-27 14:38:16,747 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-27 14:38:16,747 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-27 14:38:16,747 - INFO - strategy_runner - Running backtest for EMA_RSI_CrossoverStrategy
+2025-02-27 14:38:16,755 - INFO - handler - ✅ TimescaleDB connection pool initialized.
+2025-02-27 14:38:16,756 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-27 14:38:16,756 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-27 14:38:38,697 - INFO - handler - ✅ TimescaleDB connection pool initialized.
+2025-02-27 14:38:38,698 - INFO - backtest - Starting backtest_engine...
+2025-02-27 14:38:38,698 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-27 14:38:38,698 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-27 14:38:38,698 - INFO - backtest - Backtesting completed.
+2025-02-27 14:42:33,701 - INFO - handler - ✅ TimescaleDB connection pool initialized.
+2025-02-27 14:42:33,701 - INFO - backtest - Starting backtest_engine...
+2025-02-27 14:42:33,701 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-27 14:42:33,701 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-27 14:42:33,701 - INFO - backtest - Backtesting completed.
+2025-02-28 11:06:15,474 - INFO - handler - ✅ TimescaleDB connection pool initialized.
+2025-02-28 11:06:15,475 - INFO - backtest - Starting backtest_engine...
+2025-02-28 11:06:15,475 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-28 11:06:15,475 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-28 11:06:15,475 - INFO - backtest - Backtesting completed.
+2025-02-28 12:42:46,785 - INFO - handler - ✅ TimescaleDB connection pool initialized.
+2025-02-28 12:42:46,785 - INFO - backtest - Starting backtest_engine...
+2025-02-28 12:42:46,786 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-28 12:42:46,786 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-28 12:42:46,786 - INFO - backtest - Backtesting completed.
+2025-02-28 12:47:46,916 - INFO - handler - ✅ TimescaleDB connection pool initialized.
+2025-02-28 12:47:46,916 - INFO - backtest - Starting backtest_engine...
+2025-02-28 12:47:46,916 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-28 12:47:46,916 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-28 12:47:46,916 - INFO - backtest - Backtesting completed.
+2025-02-28 12:49:41,241 - INFO - strategy_runner - Running backtest for MACD_CrossoverStrategy
+2025-02-28 12:49:41,250 - INFO - handler - ✅ TimescaleDB connection pool initialized.
+2025-02-28 12:49:41,250 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-28 12:49:41,250 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-28 12:49:41,250 - INFO - strategy_runner - Running backtest for EMA_RSI_CrossoverStrategy
+2025-02-28 12:49:41,259 - INFO - handler - ✅ TimescaleDB connection pool initialized.
+2025-02-28 12:49:41,259 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-28 12:49:41,259 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-28 12:50:27,429 - INFO - handler - ✅ TimescaleDB connection pool initialized.
+2025-02-28 12:50:27,429 - INFO - backtest - Starting backtest_engine...
+2025-02-28 12:50:27,429 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-28 12:50:27,429 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-28 12:50:27,429 - INFO - backtest - Backtesting completed.
+2025-02-28 12:52:22,014 - INFO - handler - ✅ TimescaleDB connection pool initialized.
+2025-02-28 12:52:22,014 - INFO - backtest - Starting backtest_engine...
+2025-02-28 12:52:22,015 - ERROR - strategy_runner - Failed to fetch data: DataFrame constructor not properly called!
+2025-02-28 12:52:22,015 - ERROR - strategy_runner - No data available for backtest_engine.
+2025-02-28 12:52:22,015 - INFO - backtest - Backtesting completed.

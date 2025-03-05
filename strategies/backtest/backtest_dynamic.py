@@ -133,9 +133,9 @@ def apply_strategy(df, strategy_name, strategy_params, library):
 
 # Backtesting Function
 def backtest(df, signals):
-    capital = config["backtesting"]["capital"]
-    commission = config["backtesting"]["commission"]
-    slippage = config["backtesting"]["slippage"]
+    capital = config["backtest_engine"]["capital"]
+    commission = config["backtest_engine"]["commission"]
+    slippage = config["backtest_engine"]["slippage"]
 
     df["returns"] = df["close"].pct_change()
     df["strategy_returns"] = df["returns"] * signals["signal"].shift(1)
@@ -152,7 +152,7 @@ def backtest(df, signals):
 
 # Performance Metrics
 def performance_metrics(df):
-    final_pnl = df["cumulative_returns"].iloc[-1] - config["backtesting"]["capital"]
+    final_pnl = df["cumulative_returns"].iloc[-1] - config["backtest_engine"]["capital"]
     total_trades = df["signal"].diff().fillna(0).abs().sum() // 2  # Count position changes
     win_trades = (df["strategy_returns"] > 0).sum()
     loss_trades = (df["strategy_returns"] < 0).sum()

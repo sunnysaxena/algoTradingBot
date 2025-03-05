@@ -14,7 +14,7 @@ Key Features:
 - **Customizable Parameters**: Allows users to set EMA periods, RSI period, and overbought/oversold thresholds.
 - **Library Agnostic**: Supports both `talib` and `pandas_ta` for indicator calculations.
 - **Dynamic Signal Generation**: Generates buy/sell signals based on EMA crossovers and RSI conditions.
-- **Compatible with Backtesting**: Extends `BaseStrategy` to integrate seamlessly with the backtesting framework.
+- **Compatible with Backtesting**: Extends `BaseStrategy` to integrate seamlessly with the backtest_engine framework.
 
 Usage:
 - Initialize the class with a price DataFrame (`df`) and strategy parameters.

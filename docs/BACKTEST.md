@@ -1,5 +1,15 @@
 # Backtest Script
 
+
+A `performance_analyzer.py` file in the **backtesting** module should analyze the performance of trading strategies based on historical data. It can compute key performance metrics like **CAGR, Sharpe ratio, max drawdown, win rate**, and more.
+
+
+
+
+
+
+
+
 Here’s a Python script to backtest the EMA 9-21 & RSI Crossover Strategy using historical OHLC data. It includes trade execution logic, P&L calculation, and performance metrics.
 
 **Features of the Backtest Script**
