@@ -1,6 +1,24 @@
+"""
+4️⃣ Registering a New Broker
+    If you want to add a new broker, you can register it dynamically.
+
+Example: Register a New Broker
+
+from broker.broker_factory import BrokerFactory
+from my_custom_broker import MyCustomBroker  # Import your new broker class
+
+# Register new broker
+BrokerFactory.register_broker("custom", MyCustomBroker)
+
+# Get broker instance
+broker = BrokerFactory.get_broker()
+print(broker)
+
+"""
+
+
 import os
 import time
-
 import yaml
 import logging
 
@@ -10,6 +28,12 @@ from core.utility import Utility
 from .fyers_broker import FyersBroker
 from .zerodha_broker import ZerodhaBroker
 
+from utils.env_loader import load_env
+from utils.config_loader import load_config
+
+# Load environment variables
+_config_path = load_config()
+
 # Configure Logging
 logging.basicConfig(
     filename="broker_factory.log",
@@ -17,8 +41,8 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-_config_path = os.path.join(Utility.get_root_dir(), "config/config.yaml")
-_env_path = os.path.join(Utility.get_root_dir(), "config/.env")
+# _config_path = os.path.join(Utility.get_root_dir(), "config/config.yaml")
+# _env_path = os.path.join(Utility.get_root_dir(), "config/.env")
 
 
 class BrokerFactory:
@@ -49,7 +73,7 @@ class BrokerFactory:
                 raise ValueError(f"Unsupported broker: {broker_name}")
 
             # Load .env file
-            load_dotenv(_env_path)
+            load_dotenv(load_env())
 
             # Fetch broker credentials dynamically from environment variables
             credentials = {
@@ -82,3 +106,18 @@ class BrokerFactory:
         except Exception as e:
             logging.critical(f"Failed to load broker configuration: {e}")
             raise e
+
+
+if __name__ == '__main__':
+    try:
+        broker = BrokerFactory.get_broker()
+        print(f"Successfully initialized broker: {broker.__class__.__name__}")
+
+        # Example usage:
+        # List all methods associated with the broker object
+        methods = [method for method in dir(broker) if
+                   callable(getattr(broker, method)) and not method.startswith("__")]
+        print("Available methods:", methods)
+
+    except Exception as e:
+        print(f"Error initializing broker: {e}")

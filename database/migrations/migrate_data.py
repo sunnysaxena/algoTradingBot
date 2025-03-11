@@ -1,27 +1,11 @@
 import os
 import pymysql
 import psycopg2
-from dotenv import load_dotenv
 from tqdm import tqdm
+from dotenv import load_dotenv
 
 # Load database credentials from .env
 load_dotenv('../../config/.env')
-
-"""
-# MySQL Credentials
-MYSQL_HOST=127.0.0.1
-MYSQL_PORT=3306
-MYSQL_USER=root
-MYSQL_PASSWORD=Root@000###
-MYSQL_DATABASE=fnodatabase
-
-# TimescaleDB (PostgreSQL) Credentials
-TIMESCALEDB_HOST=localhost
-TIMESCALEDB_PORT=5432
-TIMESCALEDB_USER=postgres
-TIMESCALEDB_PASSWORD=Root@000###
-TIMESCALEDB_DATABASE=fnodatabase
-"""
 
 MYSQL_CONFIG = {
     "host": os.getenv("MYSQL_HOST"),
@@ -39,8 +23,8 @@ TIMESCALE_CONFIG = {
     "database": os.getenv("TIMESCALEDB_DATABASE"),
 }
 
-TABLE_NAME = 'sensex_1d'
-SCHEMA_NAME = 'sensex'
+TABLE_NAME = 'nifty50_1d'
+SCHEMA_NAME = 'fno'
 
 
 def fetch_mysql_data():
@@ -85,7 +69,6 @@ def insert_into_timescale(data):
 
 if __name__ == "__main__":
     # Step 1: Fetch data from MySQL
-    #$mysql_data = None # fetch_mysql_data()
     mysql_data = fetch_mysql_data()
 
     # Step 2: Insert into TimescaleDB
