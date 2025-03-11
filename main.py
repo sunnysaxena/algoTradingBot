@@ -2,18 +2,17 @@
 # Entry point for live trading
 """
 
-from core.utility import Utility
 from broker.broker_factory import BrokerFactory
 
 try:
-    # Initialize broker dynamically from YAML and .env
     broker = BrokerFactory.get_broker()
+    print(f"Successfully initialized broker: {broker.__class__.__name__}")
 
-    # Fetch balance
-    print("Balance:", broker.get_balance())
-
-    # Fetch positions
-    print("Open Positions:", broker.get_positions()['netPositions'])
+    # Example usage:
+    # List all methods associated with the broker object
+    methods = [method for method in dir(broker) if
+               callable(getattr(broker, method)) and not method.startswith("__")]
+    print("Available methods:", methods)
 
 except Exception as e:
-    print(f"Error: {e}")
+    print(f"Error initializing broker: {e}")

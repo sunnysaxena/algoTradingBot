@@ -1,6 +1,7 @@
 import os
 import psycopg2
 from dotenv import load_dotenv
+from utils.env_loader import load_env
 
 
 class TimescaleDBHandler:
@@ -8,8 +9,7 @@ class TimescaleDBHandler:
         """
         Initialize TimescaleDB connection using credentials from the .env file.
         """
-        env_path = os.path.join(os.path.dirname(__file__), '../config/.env')
-        load_dotenv(env_path)
+        load_dotenv(load_env())
 
         self.host = os.getenv("TIMESCALEDB_HOST")
         self.port = os.getenv("TIMESCALEDB_PORT")
@@ -21,6 +21,7 @@ class TimescaleDBHandler:
             raise ValueError("❌ TimescaleDB credentials are missing. Check your .env file.")
 
         self.conn = None
+        self.cursor = None
         self.connect()
 
     def connect(self):
@@ -41,16 +42,21 @@ class TimescaleDBHandler:
 
     def execute_query(self, query, params=None):
         """Execute a SELECT query and return results."""
+        if not self.conn:
+            print("❌ No active database connection.")
+            return []
         try:
             self.cursor.execute(query, params or ())
-            result = self.cursor.fetchall()
-            return result if result else []  # Ensures empty list instead of None
+            return self.cursor.fetchall() or []
         except psycopg2.Error as e:
             print(f"❌ Query execution error: {e}")
             return []
 
     def execute_update(self, query, params=None):
         """Execute an INSERT, UPDATE, or DELETE query."""
+        if not self.conn:
+            print("❌ No active database connection.")
+            return
         try:
             self.cursor.execute(query, params or ())
             self.conn.commit()
@@ -66,27 +72,14 @@ class TimescaleDBHandler:
             self.conn.close()
             print("🔌 TimescaleDB connection closed.")
 
+    def __enter__(self):
+        """Enable context manager support."""
+        if not self.conn:
+            self.connect()
+        if self.conn:
+            return self
+        raise ConnectionError("❌ Could not establish database connection.")
 
-# ✅ Fetch latest 10 records from nifty50_1m
-if __name__ == "__main__":
-    db_handler = TimescaleDBHandler()
-
-    SCHEMA_NAME = 'sensex'
-    TABLE_NAME = 'sensex_1m'
-    query = f"""
-        SELECT id, timestamp, open, high, low, close, volume 
-        FROM {SCHEMA_NAME}.{TABLE_NAME} 
-        ORDER BY timestamp DESC 
-        LIMIT 10;
-    """
-
-    results = db_handler.execute_query(query)
-
-    if results:
-        print(f"\n📌 Latest 10 records from {TABLE_NAME}:")
-        for row in results:
-            print(row)
-    else:
-        print(f"\n⚠️ No data found in {TABLE_NAME}.")
-
-    db_handler.close()
+    def __exit__(self, exc_type, exc_value, traceback):
+        """Ensure connection closes when exiting context manager."""
+        self.close()
