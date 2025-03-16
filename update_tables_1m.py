@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime
 from datetime import timedelta
 from dotenv import load_dotenv
+from trade_utils.utils import TIME_ZONE
 
 from utils.env_loader import load_env
 from utils.config_loader import load_config
@@ -20,6 +21,7 @@ with (open(config_path, "r") as file):
     config = yaml.safe_load(file)
 
 broker = BrokerFactory.get_broker()
+
 fyers_symbols = config['trading_symbols']['fyers']
 
 
@@ -45,7 +47,7 @@ def get_table_last_timestamps():
 
     with TimescaleDBHandler() as handler:  # Using the context manager
         result = handler.execute_query(query)
-        all_tables = [(schema, table) for schema, table in result if table.endswith('_1D') or table.endswith('_1d')]
+        all_tables = [(schema, table) for schema, table in result if table.endswith('_1m') or table.endswith('_1m')]
 
         for schema, table_name in all_tables:
             full_table_name = f"{schema}.{table_name}"
@@ -56,16 +58,23 @@ def get_table_last_timestamps():
                 continue  # Skip empty tables
 
             last_row = table_data[0]
-            last_date = last_row[1]  # Assuming timestamp is in the second column
+            last_date = last_row[0]  # Assuming timestamp is in the second column
 
-            if isinstance(last_date, str):
+            if isinstance(last_date, float):
+                # Convert epoch timestamp to datetime
+                last_date = datetime.fromtimestamp(last_date)
+                print(last_date)
+                exit()
+            elif isinstance(last_date, str):
+                # Convert string timestamp to datetime
                 last_date = datetime.strptime(last_date.split('+')[0], '%Y-%m-%d %H:%M:%S')
+                print(last_date)
+                exit()
 
             old_date_time[full_table_name] = last_date.strftime("%Y-%m-%d")
 
             # Next day's date
             table_date_time[full_table_name] = (last_date + timedelta(days=1)).strftime("%Y-%m-%d")
-    print(table_date_time)
     return table_date_time
 
 
@@ -116,27 +125,32 @@ def update_all_tables_fyers():
         # ✅ Ensure master_data is not empty before processing
         if master_data:
             df = pd.DataFrame(master_data, columns=["epoc", "open", "high", "low", "close", "volume"])
-            df['timestamp'] = pd.to_datetime(df['epoc'], unit='s', utc=True).map(lambda x: x.tz_convert('Asia/Kolkata'))
+            df['timestamp'] = pd.to_datetime(df['epoc'], unit='s', utc=True).map(lambda x: x.tz_convert(TIME_ZONE))
             df['timestamp'] = pd.to_datetime(df['timestamp'], format='%Y-%m-%d %H:%M:%S')
             df['timestamp'] = df['timestamp'].dt.tz_localize(None)
             df = df[["timestamp", "open", "high", "low", "close", "volume"]]
             df.drop_duplicates(inplace=True)
+            df.sort_values(by='timestamp', inplace=True)
             df['volume'] = 0
 
-            print(df.head(), df.tail())
+            print(df.head())
+            print(df.tail())
 
             if not df.empty:
                 with TimescaleDBHandler() as db_handler:
                     try:
-                        # ✅ Use cursor.executemany() for batch insert
+                        # Batch insert in chunks to optimize performance
+                        batch_size = 1000  # Customize as needed
                         insert_query = f"""
                             INSERT INTO {schema}.{table_name} (timestamp, open, high, low, close, volume) 
                             VALUES (%s, %s, %s, %s, %s, %s)
                             ON CONFLICT (timestamp) DO NOTHING;
                         """
-                        db_handler.cursor.executemany(insert_query, df.values.tolist())
-                        db_handler.conn.commit()
-                        print(f"✅ {full_table_name} updated successfully!\n")
+                        for i in range(0, len(df), batch_size):
+                            batch = df.iloc[i:i + batch_size].values.tolist()
+                            db_handler.cursor.executemany(insert_query, batch)
+                            db_handler.conn.commit()
+                            print(f"✅ Inserted {len(batch)} rows into {full_table_name}")
                     except Exception as e:
                         db_handler.conn.rollback()
                         print(f"❌ Error inserting data into {full_table_name}: {e}")
@@ -145,7 +159,7 @@ def update_all_tables_fyers():
 
 
 # Prompt user for update
-ask = input("do you want to update 1 min data (Y/n) : ")
+ask = input("Do you want to update 1-min data? (Y/n): ")
 
 if ask.lower() == 'y':
     update_all_tables_fyers()
