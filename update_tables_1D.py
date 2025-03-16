@@ -2,7 +2,6 @@ import os
 import time
 import yaml
 import pandas as pd
-import yfinance as yf
 from datetime import datetime
 from datetime import timedelta
 from dotenv import load_dotenv
@@ -58,16 +57,23 @@ def get_table_last_timestamps():
                 continue  # Skip empty tables
 
             last_row = table_data[0]
-            last_date = last_row[1]  # Assuming timestamp is in the second column
+            last_date = last_row[0]  # Assuming timestamp is in the second column
 
-            if isinstance(last_date, str):
+            if isinstance(last_date, float):
+                # Convert epoch timestamp to datetime
+                last_date = datetime.fromtimestamp(last_date)
+                print(last_date)
+                exit()
+            elif isinstance(last_date, str):
+                # Convert string timestamp to datetime
                 last_date = datetime.strptime(last_date.split('+')[0], '%Y-%m-%d %H:%M:%S')
+                print(last_date)
+                exit()
 
             old_date_time[full_table_name] = last_date.strftime("%Y-%m-%d")
 
             # Next day's date
             table_date_time[full_table_name] = (last_date + timedelta(days=1)).strftime("%Y-%m-%d")
-    print(table_date_time)
     return table_date_time
 
 
@@ -88,9 +94,9 @@ def update_all_tables_fyers():
         master_data = []
 
         # ✅ Fix: Correcting symbol mapping
-        if table_name in ['nifty50_1D', 'nifty50_1d']:
+        if table_name in ['nifty50_1d']:
             symbol = fyers_symbols['NIFTY50']
-        elif table_name in ['sensex_1D', 'sensex_1d']:
+        elif table_name in ['sensex_1d']:
             symbol = fyers_symbols['SENSEX']
         else:
             print(f'⚠️ Invalid symbol name: "{table_name}"')
@@ -121,54 +127,31 @@ def update_all_tables_fyers():
             df['timestamp'] = pd.to_datetime(df['epoc'], unit='s', utc=True).dt.tz_localize(None)
             df = df[["timestamp", "open", "high", "low", "close", "volume"]]
             df.drop_duplicates(inplace=True)
-            df['volume'] = 0  # Assuming volume is always 0 (adjust if needed)
+            df.sort_values(by='timestamp', inplace=True)  # Sort data by timestamp
 
-            print(df.head(), df.tail())
+            print(df.head())
+            print(df.tail())
 
             if not df.empty:
                 with TimescaleDBHandler() as db_handler:
                     try:
-                        # ✅ Use cursor.executemany() for batch insert
+                        # Batch insert in chunks to optimize performance
+                        batch_size = 1000  # Customize as needed
                         insert_query = f"""
                             INSERT INTO {schema}.{table_name} (timestamp, open, high, low, close, volume) 
                             VALUES (%s, %s, %s, %s, %s, %s)
                             ON CONFLICT (timestamp) DO NOTHING;
                         """
-                        db_handler.cursor.executemany(insert_query, df.values.tolist())
-                        db_handler.conn.commit()
-                        print(f"✅ {full_table_name} updated successfully!\n")
+                        for i in range(0, len(df), batch_size):
+                            batch = df.iloc[i:i + batch_size].values.tolist()
+                            db_handler.cursor.executemany(insert_query, batch)
+                            db_handler.conn.commit()
+                            print(f"✅ Inserted {len(batch)} rows into {full_table_name}")
                     except Exception as e:
                         db_handler.conn.rollback()
                         print(f"❌ Error inserting data into {full_table_name}: {e}")
             else:
                 print(f"⚠️ No new data available for {table_name}.")
-
-
-def update_all_tables_yahoo():
-    """
-    Updates all tables with missing data from Yahoo Finance.
-    """
-    global symbol
-    for table_name, last_date in get_table_last_timestamps().items():
-        if table_name == 'nifty50_1D' or table_name == 'nifty50_1d':
-            symbol = fyers_symbols['NIFTY50']
-        elif table_name == 'sensex_1D' or table_name == 'sensex_1d':
-            symbol = fyers_symbols['SENSEX']
-        else:
-            print(f'Invalid symbol name : "{table_name}"')
-
-        data = yf.Ticker(symbol)
-        df = data.history(period="1d", interval="1d")
-        df = df.drop(['Dividends', 'Stock Splits'], axis=1)
-        df.reset_index(inplace=True)
-        df.columns = ["timestamp", "open", "high", "low", "close", "volume"]
-        df['timestamp'] = pd.to_datetime(df['timestamp']).dt.strftime('%Y-%m-%d')
-        df['volume'] = 0
-        df = df.round(2)
-        df['timestamp'] = pd.to_datetime(df['timestamp'])
-
-        print(df.head(), df.tail())
-        print(f"{table_name} updated successfully!\n")
 
 
 # Prompt user for update

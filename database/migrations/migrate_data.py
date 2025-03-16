@@ -23,7 +23,7 @@ TIMESCALE_CONFIG = {
     "database": os.getenv("TIMESCALEDB_DATABASE"),
 }
 
-TABLE_NAME = 'nifty50_1d'
+TABLE_NAME = 'sensex_1m'
 SCHEMA_NAME = 'fno'
 
 
@@ -32,7 +32,7 @@ def fetch_mysql_data():
     try:
         mysql_conn = pymysql.connect(**MYSQL_CONFIG)
         cursor = mysql_conn.cursor()
-        query = F"SELECT id, timestamp, open, high, low, close, volume FROM {TABLE_NAME} ORDER BY timestamp ASC;"
+        query = F"SELECT timestamp, open, high, low, close, volume FROM {TABLE_NAME} ORDER BY timestamp ASC;"
         cursor.execute(query)
         data = cursor.fetchall()
         cursor.close()
@@ -51,9 +51,9 @@ def insert_into_timescale(data):
         cursor = timescale_conn.cursor()
 
         insert_query = F"""
-            INSERT INTO {SCHEMA_NAME}.{TABLE_NAME} (id, timestamp, open, high, low, close, volume)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (timestamp, id) DO NOTHING;
+            INSERT INTO {SCHEMA_NAME}.{TABLE_NAME} (timestamp, open, high, low, close, volume)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON CONFLICT (timestamp) DO NOTHING;
         """
 
         for row in tqdm(data, desc="📥 Migrating Data", unit="rows"):
