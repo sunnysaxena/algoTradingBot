@@ -1,68 +1,119 @@
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import numpy as np
+import logging
 
+logger = logging.getLogger(__name__)
 
 class PerformanceAnalyzer:
-    @staticmethod
-    def calculate_sharpe_ratio(returns, risk_free_rate=0.02):
-        """Calculates Sharpe Ratio (Annualized)."""
-        excess_returns = returns - risk_free_rate / 252  # Convert annual to daily rate
-        sharpe_ratio = np.mean(excess_returns) / np.std(excess_returns) * np.sqrt(252)
-        return round(sharpe_ratio, 2)
+    """
+    Analyzes the performance of a trading strategy based on executed trades.
+    """
+    def __init__(self, trades):
+        """
+        Initializes the PerformanceAnalyzer.
 
-    @staticmethod
-    def calculate_max_drawdown(cumulative_returns):
-        """Calculates Maximum Drawdown."""
-        peak = cumulative_returns.cummax()
-        drawdown = (cumulative_returns - peak) / peak
-        max_drawdown = drawdown.min() * 100  # Convert to percentage
-        return round(max_drawdown, 2)
+        Args:
+            trades (list): A list of trade dictionaries.
+        """
+        self.trades_df = pd.DataFrame(trades)
+        if not self.trades_df.empty:
+            self.trades_df['cumulative_profit'] = self.trades_df['profit'].cumsum()
+            self.trades_df['win'] = np.where(self.trades_df['profit'] > 0, 1, 0)
+            self.trades_df['loss'] = np.where(self.trades_df['profit'] < 0, 1, 0)
+            if 'entry_time' in self.trades_df.columns and 'exit_time' in self.trades_df.columns:
+                self.trades_df['holding_period'] = (pd.to_datetime(self.trades_df['exit_time']) - pd.to_datetime(self.trades_df['entry_time']))
 
-    @staticmethod
-    def win_rate(trades):
-        """Calculates the win rate of the strategy."""
-        wins = trades[trades["PnL"] > 0].shape[0]
-        total_trades = trades.shape[0]
-        return round((wins / total_trades) * 100, 2) if total_trades > 0 else 0.0
+    def analyze(self):
+        """
+        Performs the performance analysis and returns a dictionary of metrics.
+        """
+        if self.trades_df.empty:
+            return {"error": "No trades to analyze."}
 
-    @staticmethod
-    def monte_carlo_simulation(returns, simulations=1000, days=252):
-        """Runs Monte Carlo simulations to model portfolio outcomes."""
-        mean_return = np.mean(returns)
-        std_dev = np.std(returns)
+        # 1. Performance Metrics
+        total_trades = len(self.trades_df)
+        winning_trades = self.trades_df['win'].sum()
+        losing_trades = self.trades_df['loss'].sum()
+        win_rate = (winning_trades / total_trades) * 100 if total_trades > 0 else 0
+        total_profit = self.trades_df['profit'].sum()
+        average_profit = self.trades_df['profit'].mean()
+        cumulative_returns = self.trades_df['profit'].cumsum()
+        final_cumulative_profit = self.trades_df['cumulative_profit'].iloc[-1] if not self.trades_df.empty else 0
 
-        simulated_paths = []
-        for _ in range(simulations):
-            daily_returns = np.random.normal(mean_return, std_dev, days)
-            price_path = np.cumprod(1 + daily_returns)
-            simulated_paths.append(price_path)
+        # 2. Risk Metrics
+        max_drawdown = self._calculate_max_drawdown(cumulative_returns)
+        average_loss = self.trades_df[self.trades_df['profit'] < 0]['profit'].mean()
+        std_dev_returns = self.trades_df['profit'].std()
+        sharpe_ratio = (average_profit / std_dev_returns) if std_dev_returns != 0 else np.inf #Assuming risk free rate is 0
 
-        simulated_paths = np.array(simulated_paths)
-        plt.figure(figsize=(10, 5))
-        plt.plot(simulated_paths.T, alpha=0.1, color="blue")
-        plt.title("Monte Carlo Simulation of Portfolio Returns")
-        plt.xlabel("Days")
-        plt.ylabel("Portfolio Value Growth")
-        plt.show()
+        # 3. Trade-Specific Metrics
+        max_profit = self.trades_df['profit'].max()
+        max_loss = self.trades_df['profit'].min()
+        profit_factor = -average_profit / average_loss if average_loss != 0 else np.inf
+        average_holding_time = self.trades_df['holding_period'].mean() if 'holding_period' in self.trades_df.columns else None
 
-    @staticmethod
-    def generate_report(stats, trades):
-        """Generates a detailed performance report."""
-        print("\n📊 Backtest Performance Summary:")
-        print(stats)
+        # 4. Efficiency Metrics
+        average_trade_duration = self.trades_df['holding_period'].mean() if 'holding_period' in self.trades_df.columns else None
+        trades_per_day = self._calculate_trades_per_day()
 
-        returns = stats["_equity_curve"]["Equity"].pct_change().dropna()
-        cumulative_returns = stats["_equity_curve"]["Equity"]
+        # 5. Stability and Consistency Metrics
+        consistency_ratio = (winning_trades / losing_trades) if losing_trades != 0 else np.inf
+        profit_loss_ratio = abs(average_profit / average_loss) if average_loss != 0 else np.inf
 
-        sharpe_ratio = PerformanceAnalyzer.calculate_sharpe_ratio(returns)
-        max_drawdown = PerformanceAnalyzer.calculate_max_drawdown(cumulative_returns)
-        win_rate = PerformanceAnalyzer.win_rate(trades)
+        # 6. Statistical Metrics
+        skewness = self.trades_df['profit'].skew()
+        kurtosis = self.trades_df['profit'].kurtosis()
 
-        print(f"\n✅ Final Portfolio Value: ${stats['Equity Final']:.2f}")
-        print(f"📈 Max Drawdown: {max_drawdown:.2f}%")
-        print(f"📊 Sharpe Ratio: {sharpe_ratio:.2f}")
-        print(f"🔄 Win Rate: {win_rate:.2f}%")
+        results = {
+            "total_trades": total_trades,
+            "winning_trades": winning_trades,
+            "losing_trades": losing_trades,
+            "win_rate": f"{win_rate:.2f}%",
+            "total_profit": f"{total_profit:.2f}",
+            "average_profit": f"{average_profit:.2f}",
+            "final_cumulative_profit": f"{final_cumulative_profit:.2f}",
+            "max_drawdown": f"{max_drawdown:.2f}",
+            "average_loss": f"{average_loss:.2f}",
+            "std_dev_returns": f"{std_dev_returns:.2f}",
+            "sharpe_ratio": f"{sharpe_ratio:.2f}",
+            "max_profit": f"{max_profit:.2f}",
+            "max_loss": f"{max_loss:.2f}",
+            "profit_factor": f"{profit_factor:.2f}",
+            "average_holding_time": str(average_holding_time),
+            "average_trade_duration": str(average_trade_duration),
+            "trades_per_day": trades_per_day,
+            "consistency_ratio": f"{consistency_ratio:.2f}",
+            "profit_loss_ratio": f"{profit_loss_ratio:.2f}",
+            "skewness": f"{skewness:.2f}",
+            "kurtosis": f"{kurtosis:.2f}"
+        }
+        return results
 
-        # Monte Carlo Simulation
-        PerformanceAnalyzer.monte_carlo_simulation(returns)
+    def _calculate_max_drawdown(self, cumulative_returns):
+        """Calculates the maximum drawdown of the cumulative returns."""
+        if cumulative_returns.empty:
+            return 0.0
+        peak = cumulative_returns.iloc[0]
+        max_drawdown = 0
+        for value in cumulative_returns:
+            if value > peak:
+                peak = value
+            drawdown = (peak - value)
+            if drawdown > max_drawdown:
+                max_drawdown = drawdown
+        return max_drawdown
+
+    def _calculate_trades_per_day(self):
+        """Calculates the average number of trades per day."""
+        if self.trades_df.empty or 'entry_time' not in self.trades_df.columns:
+            return "N/A"
+        try:
+          first_trade_date = pd.to_datetime(self.trades_df['entry_time'].min()).date()
+          last_trade_date = pd.to_datetime(self.trades_df['entry_time'].max()).date()
+          num_days = (last_trade_date - first_trade_date).days + 1
+          if num_days <= 0:
+            return "N/A"
+          return len(self.trades_df) / num_days
+        except Exception as e:
+            logger.error(f"Error calculating trades per day: {e}")
+            return "N/A"

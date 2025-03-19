@@ -14,7 +14,6 @@ from strategies.rsi_crossover import RSI_CrossoverStrategy
 from strategies.straddle_strangle import StraddleStrangleStrategy
 from strategies.breakout_strategy import BreakoutStrategy
 from backtest_engine.backtest_runner import BacktestRunner
-from backtest_engine.performance_analyzer import PerformanceAnalyzer
 
 # Load environment variables
 load_dotenv(load_env())
@@ -35,11 +34,11 @@ strategy_mapping = {
     "MACD_CrossoverStrategy": MACD_CrossoverStrategy,
     "RSI_CrossoverStrategy": RSI_CrossoverStrategy,
     "RSI_MACD_CrossoverStrategy": RSI_MACD_CrossoverStrategy,
-    "StraddleStrangleStrategy": StraddleStrangleStrategy,
-    "BreakoutStrategy": BreakoutStrategy
+    # "StraddleStrangleStrategy": StraddleStrangleStrategy,
+    # "BreakoutStrategy": BreakoutStrategy
 }
 
-db_type = "timescaledb"  # Change to "timescaledb" or "influxdb" as needed
+db_type = config.get("database", {}).get("type", "timescaledb")  # Get database type from config
 db_config = config.get("database", {}).get(db_type, {})
 start_time = config["backtesting"]["start_date"]
 end_time = config["backtesting"]["end_date"]
@@ -61,39 +60,48 @@ if not isinstance(strategy_params, dict):
 strategy_name = strategy_params.get("name", active_strategy)  # Default to active strategy name
 db_handler = DatabaseHandler(db_config)
 
-# print(f"🚨 'Database Type' : {db_type}")
-# print(f"🚨 'Database Config (Tables)' : {db_config}")
-# print(f"🚨 'Active Strategy' : {active_strategy}")
-# print(f"🚨 'Strategies' : {strategies}")
-# print(f"🚨 'Strategy Name' : {strategy_name}")
-# print(f"🚨 'Strategy Params' : {strategy_params}")
-# print(f"🚨 'Database Handler' : {db_handler}")
+# Get the list of symbols to backtest from the config
+backtesting_symbols = config["backtesting"].get("symbols", ["NIFTY50", "SENSEX"])
+timeframes = config["backtesting"].get("timeframes", ["1m", "1d"])
+
+# Create a mapping of symbol to table name based on timeframe
+symbol_table_mapping = {
+    ("NIFTY50", "1m"): "nifty50_1m",
+    # ("NIFTY50", "1d"): "nifty50_1d",
+    # ("SENSEX", "1m"): "sensex_1m",
+    # ("SENSEX", "1d"): "sensex_1d",
+}
 
 async def run_backtest():
     """Run backtest on historical data."""
     try:
-        for strategy_name, strategy_params in strategies.items():  # ✅ Iterate over name (string) and parameters (dict)
+        for strategy_name, strategy_params in strategies.items():
             if strategy_name not in strategy_mapping:
                 logger.warning(f"⚠️ Strategy '{strategy_name}' is not recognized. Skipping...")
                 continue
 
-            strategy_class = strategy_mapping[strategy_name]  # Get actual class
+            strategy_class = strategy_mapping[strategy_name]
             logger.info(f"Running strategy: {strategy_name}")
 
             backtest_runner = BacktestRunner(strategy_class, strategy_params, db_handler)
-            await backtest_runner.run_backtest()
 
-            #
-            # strategy_runner = StrategyRunner(strategy_class, strategy_params, db_handler)
-            #
-            # trades, performance = await strategy_runner.run(start_time, end_time)
-            #
-            # analyzer = PerformanceAnalyzer(trades, performance)
-            # results = analyzer.analyze()
-            # logger.info(f"Performance Results for {strategy_name}: {results}")
+            for symbol in backtesting_symbols:
+                for timeframe in timeframes:
+                    table_name = symbol_table_mapping.get((symbol, timeframe))
+                    if table_name:
+                        logger.info(f"Backtesting {symbol} with timeframe {timeframe} using table '{table_name}'")
+                        await backtest_runner.run_backtest(
+                            symbols=[symbol],  # Pass a list with a single symbol
+                            start_date=start_time,
+                            end_date=end_time,
+                            timeframe=timeframe,
+                            custom_table_name=table_name  # Pass the specific table name
+                        )
+                    else:
+                        logger.warning(f"No table mapping found for symbol '{symbol}' and timeframe '{timeframe}'. Skipping.")
 
     finally:
-        db_handler.close_all()
+        await db_handler.close()
 
 
 if __name__ == "__main__":
