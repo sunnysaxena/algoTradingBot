@@ -1,47 +1,73 @@
-import logging
 import os
-from logging.handlers import RotatingFileHandler
+import logging
+import colorlog
+import yaml
+
 from utils.config_loader import load_config
 
-# Load config
-config = load_config()
+config_yaml = load_config()
+
+# Load Config
+with open(config_yaml, "r") as file:
+    config = yaml.safe_load(file)
+
 log_config = config.get("logging", {})
 
 # Extract values
-LOG_DIR = log_config.get("log_dir", "logs")
-LOG_FILE = log_config.get("log_file", "algo_trading.log")
-ERROR_LOG_FILE = log_config.get("error_log_file", "errors.log")
+root_dir = config.get("general", {}).get("root_dir", ".")  # Get root_dir
+log_dir_template = log_config.get("log_dir", "logs")
 
-# Create log directory if not exists
-os.makedirs(LOG_DIR, exist_ok=True)
+# Perform variable substitution
+LOG_DIR = log_dir_template.replace("${root_dir}", root_dir)
 
-# Log file paths
-LOG_PATH = os.path.join(LOG_DIR, LOG_FILE)
-ERROR_LOG_PATH = os.path.join(LOG_DIR, ERROR_LOG_FILE)
+def setup_logging(log_level=logging.INFO):
+    """Sets up colored logging and file logging."""
+    if not os.path.exists(LOG_DIR):
+        os.makedirs(LOG_DIR)
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(module)s - %(message)s",
-    handlers=[
-        RotatingFileHandler(LOG_PATH, maxBytes=5*1024*1024, backupCount=5),
-        logging.StreamHandler()
-    ]
-)
+    log_format = '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
+    date_format = '%Y-%m-%d %H:%M:%S'
 
-# Error log handler
-error_handler = RotatingFileHandler(ERROR_LOG_PATH, maxBytes=5*1024*1024, backupCount=5)
-error_handler.setLevel(logging.ERROR)
-error_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(module)s - %(message)s"))
+    # Console Handler
+    console_handler = colorlog.StreamHandler()
+    console_handler.setLevel(log_level)
+    console_formatter = colorlog.ColoredFormatter(
+        '%(log_color)s' + log_format,
+        datefmt=date_format,
+        log_colors={
+            'DEBUG': 'cyan',
+            'INFO': 'green',
+            'WARNING': 'yellow',
+            'ERROR': 'red',
+            'CRITICAL': 'red,bg_white',
+        }
+    )
+    console_handler.setFormatter(console_formatter)
 
-# Get logger instance
-def get_logger(name: str):
+    # Add console handler to root logger
+    logging.getLogger().addHandler(console_handler)
+    logging.getLogger().setLevel(log_level)
+
+
+def get_logger(name):
+    """Returns a logger with the specified name and file handler."""
     logger = logging.getLogger(name)
-    logger.addHandler(error_handler)  # Attach error log handler
-    return logger
+    logger.propagate = False  # Prevent duplicate logs
 
-# Example usage
-if __name__ == "__main__":
-    logger = get_logger("TestLogger")
-    logger.info("Logging setup complete.")
-    logger.error("This is an error message.")
+    # Check if a file handler already exists for this logger
+    file_handler_exists = any(
+        isinstance(handler, logging.FileHandler) and handler.baseFilename.endswith(f"{name}.log")
+        for handler in logger.handlers
+    )
+
+    if not file_handler_exists:
+        log_file = os.path.join(LOG_DIR, f"{name}.log")
+        file_handler = logging.FileHandler(log_file)
+        file_formatter = logging.Formatter(
+            '%(asctime)s - %(levelname)s - %(name)s - %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+        file_handler.setFormatter(file_formatter)
+        logger.addHandler(file_handler)
+
+    return logger
