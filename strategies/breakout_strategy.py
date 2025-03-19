@@ -1,22 +1,3 @@
-"""
-Breakout Trading Strategy
-
-This strategy identifies breakouts above resistance or below support based on the highest high
-and lowest low over a specified period.
-
-Features:
-- Uses a rolling high and low to define breakout levels.
-- Generates buy (1) and sell (-1) signals based on breakouts.
-- Can be configured with different breakout periods.
-
-Signal Generation:
-- Buy Signal (1) → When the closing price breaks above the highest high over `breakout_period`.
-- Sell Signal (-1) → When the closing price breaks below the lowest low over `breakout_period`.
-
-Usage:
-- Configure `breakout_period` in `config.yml`.
-"""
-
 import numpy as np
 import pandas as pd
 from strategies.base_strategy import BaseStrategy
@@ -24,19 +5,11 @@ from strategies.base_strategy import BaseStrategy
 class BreakoutStrategy(BaseStrategy):
     """
     Implements a Breakout Strategy based on historical high and low levels.
-
-    Attributes:
-        df (pd.DataFrame): Market data containing OHLC prices.
-        strategy_params (dict): Dictionary containing strategy parameters like `breakout_period`.
     """
 
     def __init__(self, df, strategy_params):
         """
         Initializes the Breakout Strategy.
-
-        Parameters:
-            df (pd.DataFrame): Market data with OHLC prices.
-            strategy_params (dict): Configuration containing breakout period.
         """
         super().__init__(df, strategy_params)
 
@@ -53,6 +26,10 @@ class BreakoutStrategy(BaseStrategy):
         self.df["High_Breakout"] = self.df["high"].rolling(window=breakout_period).max()
         self.df["Low_Breakout"] = self.df["low"].rolling(window=breakout_period).min()
 
+        # Handle NaN values (fill with the first valid value)
+        self.df["High_Breakout"].fillna(method='bfill', inplace=True)
+        self.df["Low_Breakout"].fillna(method='bfill', inplace=True)
+
         # Generate signals
         signals["signal"] = np.where(
             self.df["close"] > self.df["High_Breakout"], 1,  # Buy Signal (Breakout Up)
@@ -60,3 +37,26 @@ class BreakoutStrategy(BaseStrategy):
         )
 
         self.signals = signals
+
+    def generate_signal(self, row, positions):
+        """
+        Generates a trading signal for a given data row and position.
+
+        Args:
+            row (pd.Series): A single row of market data.
+            positions (dict): Dictionary tracking the current positions.
+
+        Returns:
+            int: 1 for buy, -1 for sell, 0 for no signal.
+        """
+
+        print(f"Close: {row['close']}, High_Breakout: {row['High_Breakout']}, Low_Breakout: {row['Low_Breakout']}")
+        input()
+
+
+        if row["close"] > row["High_Breakout"]:
+            return 1  # Buy signal
+        elif row["close"] < row["Low_Breakout"]:
+            return -1  # Sell signal
+        else:
+            return 0  # No signal

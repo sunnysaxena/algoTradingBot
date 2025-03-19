@@ -23,7 +23,7 @@ TIMESCALE_CONFIG = {
     "database": os.getenv("TIMESCALEDB_DATABASE"),
 }
 
-TABLE_NAME = 'sensex_1m'
+TABLE_NAME = 'sensex_1mbb'
 SCHEMA_NAME = 'fno'
 
 

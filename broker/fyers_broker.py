@@ -32,7 +32,6 @@ class FyersBroker(BaseBroker):
 
             # Initialize Fyers client
             self.client = FyersModel(client_id=self.client_id, token=token, log_path=self.log_dir, is_async=False)
-
         except ValueError as ve:
             logging.error(f"ValueError: {ve}")
             raise ve

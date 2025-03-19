@@ -303,6 +303,34 @@ Since you're handling tick data, OHLCV, WebSockets, and algo execution, the best
 
 <br>
 
+### 🚫 Why id Column Is Unnecessary:
+**1. Time-Series Data Uniqueness:**
+
+* The timestamp itself uniquely identifies each record, especially in OHLC data where each timestamp represents a single point in time (e.g., a minute, hour, or day).
+
+**2. Primary Key Usage:**
+
+* TimescaleDB (and most time-series databases) generally use timestamp as the primary key or as part of a composite key.
+* The id column just adds redundancy and does not serve any meaningful purpose.
+
+**3. Performance Impact:**
+
+* An id column requires additional storage and indexing, which is unnecessary if timestamp is already uniquely identifying records.
+* It can also slow down insert operations due to maintaining an extra sequence.
+
+**4. Query Efficiency:**
+
+* Queries on OHLC data almost always filter or order by timestamp, not by id.
+
+<br>
+
+### ✅ Recommended Approach:
+1. Drop the `id` column altogether.
+2. Use `timestamp` as the primary key, or a **composite primary key** if you include additional identifiers (e.g., symbol or market).
+
+
+<br>
+
 ### 🔹 What’s New in This Version?
 
 #### ✅ Constraints for Data Integrity:
