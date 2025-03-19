@@ -1,7 +1,9 @@
-import logging
 import pandas as pd
+from trade_utils import timeframe_converter as converter
+from trade_utils.data_resampler import convert_1min_to_timeframe
+from utils.logger import get_logger  # Import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)  # Get logger for this module
 
 class StrategyRunner:
     """
@@ -56,10 +58,20 @@ class StrategyRunner:
             data = await self.db_handler.execute_query(query)
             if data:
                 df = pd.DataFrame(data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-                df.set_index('timestamp', inplace=True)
+
+                if timeframe != '1m':
+                    if timeframe == '1d':
+                        df = convert_1min_to_timeframe(df, '1D')
+                    else:
+                        df = convert_1min_to_timeframe(df, timeframe)
+                else:
+                    df.set_index('timestamp', inplace=True)
+                    df.index = pd.to_datetime(df.index)
+
                 return df
             else:
-                logger.info(f"No historical data found for {symbol} between {start_date} and {end_date} using table '{full_table_name}'.")
+                logger.info(
+                    f"No historical data found for {symbol} between {start_date} and {end_date} using table '{full_table_name}'.")
                 return pd.DataFrame()
         except Exception as e:
             logger.error(f"Error fetching historical data for {symbol}: {e}")

@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
-import logging
+from utils.logger import get_logger  # Import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)  # Get logger for this module
 
 class PerformanceAnalyzer:
     """
@@ -29,6 +29,15 @@ class PerformanceAnalyzer:
         """
         if self.trades_df.empty:
             return {"error": "No trades to analyze."}
+
+        print("Trades DataFrame:")
+        print(self.trades_df)
+
+        print("Profit values:")
+        print(self.trades_df['profit'])
+
+        print("Cumulative Profit values:")
+        print(self.trades_df['cumulative_profit'])
 
         # 1. Performance Metrics
         total_trades = len(self.trades_df)

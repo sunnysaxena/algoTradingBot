@@ -1,10 +1,8 @@
-import asyncio
-import logging
-import pandas as pd
 from backtest_engine.strategy_runner import StrategyRunner
 from backtest_engine.performance_analyzer import PerformanceAnalyzer
+from utils.logger import get_logger  # Import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)  # Get logger for this module
 
 class BacktestRunner:
     """
@@ -13,11 +11,6 @@ class BacktestRunner:
     def __init__(self, strategy_class, strategy_params, db_handler):
         """
         Initializes the BacktestRunner.
-
-        Args:
-            strategy_class (type): The class of the trading strategy to backtest.
-            strategy_params (dict): Parameters for initializing the strategy.
-            db_handler (DatabaseHandler): An instance of the database handler.
         """
         self.strategy_class = strategy_class
         self.strategy_params = strategy_params
@@ -28,30 +21,21 @@ class BacktestRunner:
     async def run_backtest(self, symbols=None, start_date=None, end_date=None, timeframe='1m', custom_table_name=None):
         """
         Runs the backtest for the specified strategy on the given symbols and date range.
-
-        Args:
-            symbols (list, optional): A list of trading symbols to backtest. If None, will use a default.
-            start_date (str, optional): The start date for the backtest. If None, will use a default.
-            end_date (str, optional): The end date for the backtest. If None, will use a default.
-            timeframe (str, optional): The timeframe for the historical data. Defaults to '1m'.
-            custom_table_name (str, optional): The specific table name to use for fetching data.
         """
         if symbols is None:
-            # You might want to load default symbols from your config
-            symbols = ["NSE:NIFTY50-INDEX"]
+            symbols = ["NIFTY50"]
             logger.info(f"No symbols provided, using default: {symbols}")
 
-        # Load backtesting specific configurations
         backtest_config = self.db_handler.config.get("backtesting", {})
         start_date = start_date or backtest_config.get("start_date")
         end_date = end_date or backtest_config.get("end_date")
         slippage = backtest_config.get("slippage", 0.0)
         commission = backtest_config.get("commission", 0.0)
-        initial_capital = backtest_config.get("initial_capital", 1000000) # Get initial capital
+        initial_capital = backtest_config.get("initial_capital", 1000000)
 
         if not start_date or not end_date:
             logger.error("Start and end dates for backtesting are not configured.")
-            return
+            return [], {}  # Return empty lists/dicts instead of None
 
         all_trades = []
         all_performance = {}
@@ -78,3 +62,5 @@ class BacktestRunner:
                 logger.info(f"Performance for {symbol}:\n{perf}")
         else:
             logger.info("No trades were generated during the backtest.")
+
+        return all_trades, all_performance  # Always return a tuple
