@@ -5,10 +5,12 @@ from utils.logger import get_logger  # Import get_logger
 
 logger = get_logger(__name__)  # Get logger for this module
 
+
 class StrategyRunner:
     """
     Runs a given trading strategy on historical data and generates trades.
     """
+
     def __init__(self, strategy_class, strategy_params, db_handler, initial_capital=1000000):
         """
         Initializes the StrategyRunner.
@@ -25,7 +27,7 @@ class StrategyRunner:
         self.initial_capital = initial_capital
         self.current_capital = initial_capital
         self.trades = []
-        self.positions = {} # To track open positions
+        self.positions = {}  # To track open positions
         self.strategy_instance = None
 
     async def _fetch_historical_data(self, symbol, start_date, end_date, timeframe='1m', custom_table_name=None):
@@ -55,18 +57,38 @@ class StrategyRunner:
             full_table_name = f"fno.{table_name}"
 
             query = f"SELECT timestamp, open, high, low, close, volume FROM {full_table_name} WHERE timestamp >= '{start_date}' AND timestamp <= '{end_date}' ORDER BY timestamp ASC"
+            # print(query)
             data = await self.db_handler.execute_query(query)
             if data:
                 df = pd.DataFrame(data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 
-                if timeframe != '1m':
-                    if timeframe == '1d':
-                        df = convert_1min_to_timeframe(df, '1D')
-                    else:
-                        df = convert_1min_to_timeframe(df, timeframe)
+                # Convert the timestamp column to Asia/Kolkata
+                if 'timestamp' in df.columns:
+                    df['timestamp'] = pd.to_datetime(df['timestamp'],
+                                                     utc=True)  # ensure that pandas knows that the column is in UTC.
+                    df['timestamp'] = df['timestamp'].dt.tz_convert('Asia/Kolkata')
+                    df['timestamp'] = df['timestamp'].dt.tz_localize(None)
+                else:
+                    logger.warning("Timestamp column not found in DataFrame.")
+
+                if timeframe == '1m':
+                    df = df
+                elif timeframe == '5m':
+                    df = convert_1min_to_timeframe(df, '5T')
+                elif timeframe == '15m':
+                    df = convert_1min_to_timeframe(df, '15T')
+                elif timeframe == '1h':
+                    df = convert_1min_to_timeframe(df, '1H')
+                elif timeframe == '1d':
+                    df = convert_1min_to_timeframe(df, '1D')
                 else:
                     df.set_index('timestamp', inplace=True)
                     df.index = pd.to_datetime(df.index)
+
+                df.reset_index(inplace=True)
+                df.set_index('timestamp', inplace=True)
+                # print(df.columns)
+                # print(df.shape)
 
                 return df
             else:
@@ -76,7 +98,6 @@ class StrategyRunner:
         except Exception as e:
             logger.error(f"Error fetching historical data for {symbol}: {e}")
             return pd.DataFrame()
-
 
     def _execute_trade(self, symbol, timestamp, current_data, action, slippage, commission, quantity=None):
         """
@@ -138,7 +159,6 @@ class StrategyRunner:
                 position = row['quantity']
                 entry_price = row['price']
 
-
         total_profit = df['profit'].sum()
         num_trades = len(df)
         winning_trades = len(df[df['profit'] > 0])
@@ -162,11 +182,17 @@ class StrategyRunner:
         }
         return performance
 
-    async def run(self, symbol, start_date, end_date, timeframe='1m', slippage=0.0, commission=0.0, custom_table_name=None):
+    async def run(self, symbol, start_date, end_date, timeframe='1m', slippage=0.0, commission=0.0,
+                  custom_table_name=None):
         """
         Fetches historical data and runs the strategy to generate trades for a single symbol.
         """
         historical_data = await self._fetch_historical_data(symbol, start_date, end_date, timeframe, custom_table_name)
+        # print(historical_data.head())
+        # print(historical_data.shape)
+        # print(historical_data.columns)
+        # print(timeframe)
+
         if historical_data.empty:
             return [], {}
 
@@ -187,7 +213,8 @@ class StrategyRunner:
             signal = row['signal']
             current_data = historical_data.loc[index]
             if signal:
-                trade = self._execute_trade(symbol, index, current_data, 'BUY' if signal == 1 else 'SELL', slippage, commission)
+                trade = self._execute_trade(symbol, index, current_data, 'BUY' if signal == 1 else 'SELL', slippage,
+                                            commission)
                 if trade:
                     self.trades.append(trade)
                     # Update capital and positions based on the trade (Simplified for basic backtesting)
